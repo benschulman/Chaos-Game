@@ -12,11 +12,10 @@ class Dot:
     def draw(self, screen):
         pygame.draw.circle(screen, WHITE, self.pos, 5, 5)
 
-    def x_pos(self):
-        return self.pos[0]
-
-    def y_pos(self):
-        return self.pos[1]
+    def gen_new_dot_loc(self, x, y, mult):
+        new_x = int(self.pos[0] * mult + x * (1 - mult))
+        new_y = int(self.pos[1] * mult + y * (1 - mult))
+        return new_x, new_y
 
 
 def text_objects(text, font):
@@ -34,14 +33,25 @@ def main():
     done = False
     iterate = False
     clear = True
-    x = 0
-    y = 0
-    iterations = 10000
-    clock = pygame.time.Clock()
 
-    d1 = Dot([450, 100])
-    d2 = Dot([150, 600])
-    d3 = Dot([750, 600])
+    # Default Settings for Iteration
+    x = 450
+    y = 347
+    dot1_loc = [450, 100]
+    dot2_loc = [150, 600]
+    dot3_loc = [750, 600]
+    distance_mult = .5
+    iterations = 10000
+
+    # Default Dots
+    d1 = Dot(dot1_loc)
+    d2 = Dot(dot2_loc)
+    d3 = Dot(dot3_loc)
+
+    # Dot Array
+    dot_arr = [d1, d2, d3]
+
+    clock = pygame.time.Clock()
 
     # Main Loop
     while not done:
@@ -52,12 +62,22 @@ def main():
                 done = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if 10 < mouse[0] < 10 + 100:
+                    # RESET
                     if 10 < mouse[1] < 10 + 25:
                         clear = True
+                        x = 450
+                        y = 347
+                        distance_mult = .5
+                        dot_arr = []
+                    # Iterate
                     elif 40 < mouse[1] < 40 + 25:
                         iterate = True
+                    # Change Iterations
                     elif 70 < mouse[1] < 70 + 25:
                         iterations = int(input("Iterations"))
+                    elif 100 < mouse[1] < 100 + 25:
+                        dot_arr.append(Dot([x, y]))
+                # Set Start Point
                 else:
                     x = mouse[0]
                     y = mouse[1]
@@ -65,36 +85,21 @@ def main():
         # Game Logic
         mouse = pygame.mouse.get_pos()
 
-    # Drawing Code
+        # -----Drawing Code-----#
         if clear:
             screen.fill(BLACK)
 
         # Draw 3 Dots
-        d1.draw(screen)
-        d2.draw(screen)
-        d3.draw(screen)
+        for dot in dot_arr:
+            dot.draw(screen)
 
         # Iteration Loop
-        if iterate:
+        if iterate and len(dot_arr) > 0:
             iterate = False
             for i in range(iterations):
-                r = random.randint(1, 3)
+                r = random.randint(0, len(dot_arr)-1)
                 pygame.draw.circle(screen, WHITE, [x, y], 1, 1)
-                if r == 1:
-                    x += d1.x_pos()
-                    x = int(x/2)
-                    y += d1.y_pos()
-                    y = int(y / 2)
-                if r == 2:
-                    x += d2.x_pos()
-                    x = int(x / 2)
-                    y += d2.y_pos()
-                    y = int(y / 2)
-                if r == 3:
-                    x += d3.x_pos()
-                    x = int(x / 2)
-                    y += d3.y_pos()
-                    y = int(y/2)
+                x, y = dot_arr[r].gen_new_dot_loc(x, y, distance_mult)
 
             clear = False
 
@@ -116,6 +121,12 @@ def main():
         adj_surface, adj_rect = text_objects("Adjust Iterations", font)
         adj_rect.center = ((10 + (100 / 2)), (70 + (25 / 2)))
         screen.blit(adj_surface, adj_rect)
+
+        # Add dot
+        pygame.draw.rect(screen, WHITE, [10, 100, 100, 25])
+        add_dot_surface, add_dot_rect = text_objects("Add Dot", font)
+        add_dot_rect.center = ((10 + (100 / 2)), (100 + (25 / 2)))
+        screen.blit(add_dot_surface, add_dot_rect)
 
         pygame.display.flip()
 
