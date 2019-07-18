@@ -1,5 +1,5 @@
 # Chaos-Game
-A simple game dealing with chaos theory.
+A simple implementation of a Chaos Game with Python/pygame.
 
 Directions:
 Click anywhere on the screen to choose a starting point then click "Iterate" to begin iterating.
